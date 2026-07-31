@@ -1,0 +1,15 @@
+diff --git a/index.js b/index.js
+index 0d016a9..c97e57f 100644
+--- a/index.js
++++ b/index.js
+@@ -95,8 +95,8 @@ function fillCache(markdownOrJsx, filePath, filePathAbs) {
+           } else if (isRootRelativeLink) {
+             absolute = path.resolve(path.join(basepath, match));
+           } else {
+-            const [, filePathBase] = filePath.match(/^(.+\/)[^/]+$/);
+-            absolute = path.resolve(filePathBase + '/' + match);
++            const filePathBase = path.dirname(filePath);
++            absolute = path.resolve(filePathBase, match);
+           }
+
+           cache[filePathAbs].internalLinks.push({

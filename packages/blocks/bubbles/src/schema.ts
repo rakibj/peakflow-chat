@@ -1,0 +1,19 @@
+import { z } from "zod";
+import { audioBubbleBlockSchema } from "./audio/schema";
+import { embedBubbleBlockSchema } from "./embed/schema";
+import { imageBubbleBlockSchema } from "./image/schema";
+import { linkBubbleBlockSchema } from "./link/schema";
+import { textBubbleBlockSchema } from "./text/schema";
+import { videoBubbleBlockSchema } from "./video/schema";
+
+export const bubbleBlockSchema = z.discriminatedUnion("type", [
+  textBubbleBlockSchema,
+  imageBubbleBlockSchema,
+  videoBubbleBlockSchema,
+  embedBubbleBlockSchema,
+  audioBubbleBlockSchema,
+  linkBubbleBlockSchema,
+]);
+export type BubbleBlock = z.infer<typeof bubbleBlockSchema>;
+
+export type BubbleBlockContent = BubbleBlock["content"];
