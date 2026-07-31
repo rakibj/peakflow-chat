@@ -93,11 +93,29 @@ export const httpProxyCredentialsSchema = z
   .merge(credentialsBaseSchema);
 export type HttpProxyCredentials = z.infer<typeof httpProxyCredentialsSchema>;
 
+export const apiCredentialsDataSchema = z.object({
+  fields: z.array(
+    z.object({
+      key: z.string(),
+      value: z.string(),
+    }),
+  ),
+});
+
+export const apiCredentialsSchema = z
+  .object({
+    type: z.literal("apiCredentials"),
+    data: apiCredentialsDataSchema,
+  })
+  .merge(credentialsBaseSchema);
+export type ApiCredentials = z.infer<typeof apiCredentialsSchema>;
+
 export const creatableCredentialsSchemas = [
   smtpCredentialsSchema,
   googleSheetsCredentialsSchema,
   stripeCredentialsSchema,
   whatsAppCredentialsSchema,
+  apiCredentialsSchema,
 ] as const;
 
 const credentialsSchema = z.discriminatedUnion("type", [
@@ -118,6 +136,7 @@ export const credentialsTypes = [
   "google sheets",
   "stripe",
   "whatsApp",
+  "apiCredentials",
   "http proxy",
   ...(Object.keys(forgedCredentialsSchemas) as Array<
     keyof typeof forgedCredentialsSchemas

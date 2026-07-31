@@ -7,7 +7,7 @@ import {
   type ProductNode,
   pickLowestPricedVariant,
 } from "../helpers/products";
-import { storefrontRequest } from "../helpers/storefront";
+import { shopifyGraphqlRequest } from "../helpers/storefront";
 
 type ProductsQueryData = {
   products: {
@@ -30,7 +30,9 @@ export const fetchProductsHandler = createActionHandler(fetchProducts, {
   server: async ({
     credentials: {
       storeDomain,
+      apiType,
       storefrontAccessToken,
+      adminAccessToken,
       storeUrl,
       apiVersion,
       usePrivateToken,
@@ -44,8 +46,13 @@ export const fetchProductsHandler = createActionHandler(fetchProducts, {
     variables,
     logs,
   }) => {
-    if (!storeDomain || !storefrontAccessToken)
-      return logs.add("Store domain and Storefront access token are required");
+    const isAdmin = apiType === "admin";
+    if (!storeDomain || (isAdmin ? !adminAccessToken : !storefrontAccessToken))
+      return logs.add(
+        isAdmin
+          ? "Store domain and Admin API access token are required"
+          : "Store domain and Storefront access token are required",
+      );
     if (!outputVariableId)
       return logs.add("An output variable is required to save the products");
 
@@ -65,9 +72,11 @@ export const fetchProductsHandler = createActionHandler(fetchProducts, {
       let hasNextPage = true;
 
       while (hasNextPage) {
-        const data: ProductsQueryData = await storefrontRequest({
+        const data: ProductsQueryData = await shopifyGraphqlRequest({
           storeDomain,
+          apiType,
           storefrontAccessToken,
+          adminAccessToken,
           apiVersion,
           usePrivateToken,
           query: PRODUCTS_QUERY,

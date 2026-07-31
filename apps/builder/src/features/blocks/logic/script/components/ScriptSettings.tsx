@@ -4,7 +4,11 @@ import { DebouncedTextInput } from "@typebot.io/ui/components/DebouncedTextInput
 import { Field } from "@typebot.io/ui/components/Field";
 import { MoreInfoTooltip } from "@typebot.io/ui/components/MoreInfoTooltip";
 import { Switch } from "@typebot.io/ui/components/Switch";
+import { useState } from "react";
 import { CodeEditor } from "@/components/inputs/CodeEditor";
+import { ApiCredentialsCreateDialog } from "@/features/credentials/components/ApiCredentialsCreateDialog";
+import { CredentialsDropdown } from "@/features/credentials/components/CredentialsDropdown";
+import { useWorkspace } from "@/features/workspace/WorkspaceProvider";
 import { UnsafeScriptAlert } from "./UnsafeScriptAlert";
 
 type Props = {
@@ -13,6 +17,9 @@ type Props = {
 };
 
 export const ScriptSettings = ({ options, onOptionsChange }: Props) => {
+  const { workspace } = useWorkspace();
+  const [isCreateCredentialsOpen, setIsCreateCredentialsOpen] = useState(false);
+
   const handleNameChange = (name: string) =>
     onOptionsChange({ ...options, name });
 
@@ -23,6 +30,12 @@ export const ScriptSettings = ({ options, onOptionsChange }: Props) => {
     onOptionsChange({ ...options, isExecutedOnClient });
 
   const updateIsUnsafe = () => onOptionsChange({ ...options, isUnsafe: false });
+
+  const updateCredentialsId = (credentialsId?: string) =>
+    onOptionsChange({ ...options, credentialsId });
+
+  const isExecutedOnClient =
+    options?.isExecutedOnClient ?? defaultScriptOptions.isExecutedOnClient;
 
   return (
     <div className="flex flex-col gap-4">
@@ -51,6 +64,32 @@ export const ScriptSettings = ({ options, onOptionsChange }: Props) => {
       </Field.Root>
       {options?.isUnsafe === true && options?.isExecutedOnClient !== false && (
         <UnsafeScriptAlert onTrustClick={updateIsUnsafe} />
+      )}
+      {!isExecutedOnClient && workspace?.id && (
+        <Field.Root>
+          <Field.Label>
+            API credentials:{" "}
+            <MoreInfoTooltip>
+              Secrets stored here are decrypted server-side and exposed as a{" "}
+              <code>credentials</code> object in this script — they are never
+              saved in the script's code or exported bot file.
+            </MoreInfoTooltip>
+          </Field.Label>
+          <CredentialsDropdown
+            type="apiCredentials"
+            scope={{ type: "workspace", workspaceId: workspace.id }}
+            currentCredentialsId={options?.credentialsId}
+            credentialsName="API credentials"
+            onCredentialsSelect={updateCredentialsId}
+            onCreateNewClick={() => setIsCreateCredentialsOpen(true)}
+            hideIfNoCredentials={false}
+          />
+          <ApiCredentialsCreateDialog
+            isOpen={isCreateCredentialsOpen}
+            onClose={() => setIsCreateCredentialsOpen(false)}
+            onNewCredentials={updateCredentialsId}
+          />
+        </Field.Root>
       )}
       <CodeEditor
         defaultValue={options?.content}

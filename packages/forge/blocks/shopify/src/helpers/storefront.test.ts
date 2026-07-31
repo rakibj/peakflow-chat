@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { storefrontRequest } from "./storefront";
+import { shopifyGraphqlRequest } from "./storefront";
 
 const buildFetch = (data: unknown, errors?: { message: string }[]) => {
   const calls: { url: string; body: unknown; headers: Headers }[] = [];
@@ -47,10 +47,10 @@ const baseArgs = {
   variables: { first: 50 },
 };
 
-describe("storefrontRequest", () => {
+describe("shopifyGraphqlRequest", () => {
   it("posts to the Storefront GraphQL endpoint", async () => {
     const { fetchMock, calls } = buildFetch({ products: { edges: [] } });
-    await storefrontRequest({ ...baseArgs, customFetch: fetchMock });
+    await shopifyGraphqlRequest({ ...baseArgs, customFetch: fetchMock });
 
     expect(calls[0]?.url).toBe(
       "https://example.myshopify.com/api/2025-07/graphql.json",
@@ -59,7 +59,7 @@ describe("storefrontRequest", () => {
 
   it("sends the GraphQL query and variables as the JSON body", async () => {
     const { fetchMock, calls } = buildFetch({ ok: true });
-    await storefrontRequest({ ...baseArgs, customFetch: fetchMock });
+    await shopifyGraphqlRequest({ ...baseArgs, customFetch: fetchMock });
 
     expect(calls[0]?.body).toEqual({
       query: baseArgs.query,
@@ -69,7 +69,7 @@ describe("storefrontRequest", () => {
 
   it("honours a custom API version", async () => {
     const { fetchMock, calls } = buildFetch({ ok: true });
-    await storefrontRequest({
+    await shopifyGraphqlRequest({
       ...baseArgs,
       apiVersion: "2024-10",
       customFetch: fetchMock,
@@ -82,7 +82,7 @@ describe("storefrontRequest", () => {
 
   it("returns the unwrapped data", async () => {
     const { fetchMock } = buildFetch({ hello: "world" });
-    const data = await storefrontRequest<{ hello: string }>({
+    const data = await shopifyGraphqlRequest<{ hello: string }>({
       ...baseArgs,
       customFetch: fetchMock,
     });
@@ -91,7 +91,7 @@ describe("storefrontRequest", () => {
 
   it("sends the public access-token header by default", async () => {
     const { fetchMock, calls } = buildFetch({ ok: true });
-    await storefrontRequest({ ...baseArgs, customFetch: fetchMock });
+    await shopifyGraphqlRequest({ ...baseArgs, customFetch: fetchMock });
 
     expect(calls[0]?.headers.get("X-Shopify-Storefront-Access-Token")).toBe(
       "shpat_xxx",
@@ -103,7 +103,7 @@ describe("storefrontRequest", () => {
 
   it("sends the private-token header when usePrivateToken is set", async () => {
     const { fetchMock, calls } = buildFetch({ ok: true });
-    await storefrontRequest({
+    await shopifyGraphqlRequest({
       ...baseArgs,
       usePrivateToken: true,
       customFetch: fetchMock,
@@ -117,12 +117,46 @@ describe("storefrontRequest", () => {
     ).toBeNull();
   });
 
+  it("posts to the Admin API GraphQL endpoint when apiType is admin", async () => {
+    const { fetchMock, calls } = buildFetch({ ok: true });
+    await shopifyGraphqlRequest({
+      ...baseArgs,
+      apiType: "admin",
+      adminAccessToken: "shpat_admin_xxx",
+      customFetch: fetchMock,
+    });
+
+    expect(calls[0]?.url).toBe(
+      "https://example.myshopify.com/admin/api/2025-07/graphql.json",
+    );
+  });
+
+  it("sends the admin access-token header when apiType is admin", async () => {
+    const { fetchMock, calls } = buildFetch({ ok: true });
+    await shopifyGraphqlRequest({
+      ...baseArgs,
+      apiType: "admin",
+      adminAccessToken: "shpat_admin_xxx",
+      customFetch: fetchMock,
+    });
+
+    expect(calls[0]?.headers.get("X-Shopify-Access-Token")).toBe(
+      "shpat_admin_xxx",
+    );
+    expect(
+      calls[0]?.headers.get("X-Shopify-Storefront-Access-Token"),
+    ).toBeNull();
+    expect(
+      calls[0]?.headers.get("Shopify-Storefront-Private-Token"),
+    ).toBeNull();
+  });
+
   it("throws when the response contains top-level GraphQL errors", async () => {
     const { fetchMock } = buildFetch(undefined, [
       { message: "Invalid access token" },
     ]);
     await expect(
-      storefrontRequest({ ...baseArgs, customFetch: fetchMock }),
+      shopifyGraphqlRequest({ ...baseArgs, customFetch: fetchMock }),
     ).rejects.toThrow("Invalid access token");
   });
 });

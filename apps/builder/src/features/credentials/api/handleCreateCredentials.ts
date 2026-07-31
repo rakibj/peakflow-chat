@@ -2,6 +2,7 @@ import { ORPCError } from "@orpc/server";
 import { encrypt } from "@typebot.io/credentials/encrypt";
 import type { Credentials } from "@typebot.io/credentials/schemas";
 import {
+  apiCredentialsSchema,
   googleSheetsCredentialsSchema,
   smtpCredentialsSchema,
   stripeCredentialsSchema,
@@ -27,6 +28,7 @@ const credentialsCreateSchema = z
     smtpCredentialsSchema.pick(inputShape),
     googleSheetsCredentialsSchema.pick(inputShape),
     whatsAppCredentialsSchema.pick(inputShape),
+    apiCredentialsSchema.pick(inputShape),
     ...Object.values(forgedCredentialsSchemas).map((schema) =>
       schema.pick(inputShape),
     ),

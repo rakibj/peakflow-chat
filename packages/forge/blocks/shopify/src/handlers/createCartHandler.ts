@@ -2,7 +2,7 @@ import { createActionHandler } from "@typebot.io/forge";
 import { parseJsonArrayInput } from "@typebot.io/lib/parseJsonArray";
 import { parseUnknownError } from "@typebot.io/lib/parseUnknownError";
 import { createCart } from "../actions/createCart";
-import { storefrontRequest } from "../helpers/storefront";
+import { shopifyGraphqlRequest } from "../helpers/storefront";
 import { coerceVariantIds } from "../helpers/variantIds";
 
 type CartCreateData = {
@@ -29,7 +29,9 @@ export const createCartHandler = createActionHandler(createCart, {
   server: async ({
     credentials: {
       storeDomain,
+      apiType,
       storefrontAccessToken,
+      adminAccessToken,
       apiVersion,
       usePrivateToken,
     },
@@ -37,8 +39,13 @@ export const createCartHandler = createActionHandler(createCart, {
     variables,
     logs,
   }) => {
-    if (!storeDomain || !storefrontAccessToken)
-      return logs.add("Store domain and Storefront access token are required");
+    const isAdmin = apiType === "admin";
+    if (!storeDomain || (isAdmin ? !adminAccessToken : !storefrontAccessToken))
+      return logs.add(
+        isAdmin
+          ? "Store domain and Admin API access token are required"
+          : "Store domain and Storefront access token are required",
+      );
     if (!variantIdsVariableId)
       return logs.add("A variable holding variant IDs is required");
 
@@ -55,9 +62,11 @@ export const createCartHandler = createActionHandler(createCart, {
       return logs.add("No valid variant IDs were found in the variable");
 
     try {
-      const data = await storefrontRequest<CartCreateData>({
+      const data = await shopifyGraphqlRequest<CartCreateData>({
         storeDomain,
+        apiType,
         storefrontAccessToken,
+        adminAccessToken,
         apiVersion,
         usePrivateToken,
         query: CART_CREATE_MUTATION,

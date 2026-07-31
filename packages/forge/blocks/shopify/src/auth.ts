@@ -16,6 +16,15 @@ export const auth = createAuth({
         isDebounceDisabled: true,
       },
     }),
+    apiType: option.enum(["storefront", "admin"]).meta({
+      layout: {
+        label: "API type",
+        defaultValue: "storefront",
+        helperText:
+          "Storefront API is for public product/cart data. Admin API grants broader access (orders, customers, inventory, …) via a custom app token — only use it if the Storefront API doesn't cover what you need.",
+        isDebounceDisabled: true,
+      },
+    }),
     storefrontAccessToken: option.string.meta({
       layout: {
         label: "Storefront access token",
@@ -25,6 +34,8 @@ export const auth = createAuth({
           "Create a Storefront API access token in your Shopify admin under Apps → Headless (or Apps → Sales channels).",
         withVariableButton: false,
         isDebounceDisabled: true,
+        isHidden: ({ apiType }: { apiType?: "storefront" | "admin" }) =>
+          apiType === "admin",
       },
     }),
     usePrivateToken: option.boolean.meta({
@@ -34,6 +45,21 @@ export const auth = createAuth({
         helperText:
           "Enable for a private Storefront token (shpat_…). Sends the Shopify-Storefront-Private-Token header instead of X-Shopify-Storefront-Access-Token.",
         isDebounceDisabled: true,
+        isHidden: ({ apiType }: { apiType?: "storefront" | "admin" }) =>
+          apiType === "admin",
+      },
+    }),
+    adminAccessToken: option.string.meta({
+      layout: {
+        label: "Admin API access token",
+        isRequired: true,
+        inputType: "password",
+        helperText:
+          "Create a custom app in Settings → Apps and sales channels → Develop apps, and copy its Admin API access token (shpat_…). Grants access according to the scopes you enabled on that app.",
+        withVariableButton: false,
+        isDebounceDisabled: true,
+        isHidden: ({ apiType }: { apiType?: "storefront" | "admin" }) =>
+          apiType !== "admin",
       },
     }),
     storeUrl: option.string.meta({

@@ -13,6 +13,12 @@ export const scriptOptionsSchema = z.object({
       "Enabled by default for imported bots to prevent code to be executed in preview with priviledged access",
     ),
   shouldExecuteInParentContext: z.boolean().optional(),
+  credentialsId: z
+    .string()
+    .optional()
+    .describe(
+      "References an `apiCredentials` row. Only used for server-side execution — secrets are decrypted at runtime and injected as `credentials`, never stored in `content`.",
+    ),
 });
 
 export const scriptBlockSchema = blockBaseSchema.merge(

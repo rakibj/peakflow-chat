@@ -1,6 +1,7 @@
 import { ORPCError } from "@orpc/server";
 import { encrypt } from "@typebot.io/credentials/encrypt";
 import {
+  apiCredentialsSchema,
   googleSheetsCredentialsSchema,
   smtpCredentialsSchema,
   stripeCredentialsSchema,
@@ -23,6 +24,7 @@ const credentialsUpdateSchema = z.discriminatedUnion("type", [
   smtpCredentialsSchema.pick(inputShape),
   googleSheetsCredentialsSchema.pick(inputShape),
   whatsAppCredentialsSchema.pick(inputShape),
+  apiCredentialsSchema.pick(inputShape),
   ...Object.values(forgedCredentialsSchemas).map((schema) =>
     schema.pick(inputShape),
   ),

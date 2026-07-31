@@ -21,6 +21,7 @@ type Props = {
   body: string;
   sessionStore: SessionStore;
   args?: Record<string, unknown>;
+  credentials?: Record<string, string>;
 };
 
 export const executeFunction = async ({
@@ -28,6 +29,7 @@ export const executeFunction = async ({
   body,
   sessionStore,
   args: initialArgs,
+  credentials,
 }: Props) => {
   const parsedBody = parseVariables(body, {
     fieldToParse: "id",
@@ -108,6 +110,8 @@ export const executeFunction = async ({
   args.forEach(({ id, value }) => {
     jail.setSync(id, parseTransferrableValue(value));
   });
+  if (credentials)
+    jail.setSync("credentials", parseTransferrableValue(credentials));
   const run = (code: string) =>
     context.evalClosure(
       `return (async function() {

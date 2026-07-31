@@ -3,6 +3,12 @@
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "references": [
     {
+      "path": "../../../runtime-session-store"
+    },
+    {
+      "path": "../../../variables"
+    },
+    {
       "path": "../../../lib"
     },
     {

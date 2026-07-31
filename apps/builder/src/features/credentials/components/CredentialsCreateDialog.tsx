@@ -7,6 +7,7 @@ import { SmtpCredentialsCreateDialogBody } from "@/features/blocks/integrations/
 import { ForgedCredentialsCreateDialogBody } from "@/features/forge/components/credentials/ForgedCredentialsCreateDialog";
 import { ForgedOAuthCredentialsCreateDialogBody } from "@/features/forge/components/credentials/ForgedOAuthCredentialsCreateDialog";
 import { WhatsAppCreateDialogBody } from "@/features/publish/components/deploy/dialogs/whatsApp/WhatsAppCredentialsDialog";
+import { ApiCredentialsCreateDialogBody } from "./ApiCredentialsCreateDialog";
 
 export const CredentialsCreateDialog = ({
   isOpen,
@@ -61,6 +62,8 @@ const CredentialsCreateDialogPopup = ({
       <WhatsAppCreateDialogBody onNewCredentials={onSubmit} onClose={onClose} />
     );
   if (type === "http proxy") return null;
+  if (type === "apiCredentials")
+    return <ApiCredentialsCreateDialogBody onNewCredentials={onSubmit} />;
 
   if (forgedBlocks[type].auth?.type === "oauth")
     return (

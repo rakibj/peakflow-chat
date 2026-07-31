@@ -12,6 +12,7 @@ import { Skeleton } from "@typebot.io/ui/components/Skeleton";
 import { useOpenControls } from "@typebot.io/ui/hooks/useOpenControls";
 import { ArrowDown01Icon } from "@typebot.io/ui/icons/ArrowDown01Icon";
 import { Edit03Icon } from "@typebot.io/ui/icons/Edit03Icon";
+import { SquareLock01Icon } from "@typebot.io/ui/icons/SquareLock01Icon";
 import { TrashIcon } from "@typebot.io/ui/icons/TrashIcon";
 import { cn } from "@typebot.io/ui/lib/cn";
 import { type SVGProps, useMemo, useRef, useState } from "react";
@@ -238,6 +239,8 @@ const CredentialsIcon = ({
       return <WhatsAppLogo {...props} />;
     case "http proxy":
       return null;
+    case "apiCredentials":
+      return <SquareLock01Icon {...props} />;
     default:
       return <BlockIcon type={type} {...props} />;
   }
@@ -261,6 +264,8 @@ const CredentialsLabel = ({
       return <p className={cn("text-sm", className)}>WhatsApp</p>;
     case "http proxy":
       return null;
+    case "apiCredentials":
+      return <p className={cn("text-sm", className)}>API credentials</p>;
     default:
       return <BlockLabel type={type} className={className} />;
   }

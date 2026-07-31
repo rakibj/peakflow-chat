@@ -8,6 +8,12 @@
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "references": [
     {
+      "path": "../../../runtime-session-store/tsconfig.lib.json"
+    },
+    {
+      "path": "../../../variables/tsconfig.lib.json"
+    },
+    {
       "path": "../../../lib/tsconfig.lib.json"
     },
     {

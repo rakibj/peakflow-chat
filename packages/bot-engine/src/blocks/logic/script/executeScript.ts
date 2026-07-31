@@ -1,6 +1,8 @@
 import { defaultScriptOptions } from "@typebot.io/blocks-logic/script/constants";
 import type { ScriptBlock } from "@typebot.io/blocks-logic/script/schema";
 import type { SessionState } from "@typebot.io/chat-session/schemas";
+import { decryptAndRefreshCredentialsData } from "@typebot.io/credentials/decryptAndRefreshCredentials";
+import { getCredentials } from "@typebot.io/credentials/getCredentials";
 import type { SessionStore } from "@typebot.io/runtime-session-store";
 import { executeFunction } from "@typebot.io/variables/executeFunction";
 import { extractVariablesFromText } from "@typebot.io/variables/extractVariablesFromText";
@@ -27,10 +29,36 @@ export const executeScript = async (
     block.options.isExecutedOnClient ?? defaultScriptOptions.isExecutedOnClient;
 
   if (!isExecutedOnClient) {
+    let credentials: Record<string, string> | undefined;
+    if (block.options.credentialsId) {
+      const storedCredentials = await getCredentials(
+        block.options.credentialsId,
+        state.workspaceId,
+      );
+      const credentialsData = storedCredentials
+        ? await decryptAndRefreshCredentialsData(
+            {
+              id: block.options.credentialsId,
+              type: "apiCredentials",
+              data: storedCredentials.data,
+              iv: storedCredentials.iv,
+            },
+            undefined,
+          )
+        : undefined;
+      credentials = Object.fromEntries(
+        (
+          (credentialsData as { fields?: { key: string; value: string }[] })
+            ?.fields ?? []
+        ).map(({ key, value }) => [key, value]),
+      );
+    }
+
     const { newVariables, error } = await executeFunction({
       variables,
       body: block.options.content,
       sessionStore,
+      credentials,
     });
 
     const updateVarResults = newVariables
