@@ -18,7 +18,7 @@ export const decryptAndRefreshCredentialsData = async (
   if (!credentials) return;
   const decryptedData = await decrypt(credentials.data, credentials.iv);
   const blockDef = forgedBlocks[credentials.type as keyof typeof forgedBlocks];
-  if (blockDef.auth?.type === "oauth") {
+  if (blockDef?.auth?.type === "oauth") {
     const { customClient, refreshToken, expiryDate } = decryptedData as {
       customClient?: {
         id: string;
