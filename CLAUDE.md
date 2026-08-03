@@ -54,6 +54,8 @@ Keep unit tests for every feature to prevent regressions.
 
 ## Active Specs
 
+- **Maison la Fleur v23 QA fix plan** (ongoing, not yet started) — Full regression report from the client reviewed against the live flow JSON and platform source; root cause and fix type (flow vs. code) established for nearly all 25 findings (budget filtering, price formatting, invalid-message localization, occasion-other blank field, handoff dead end, answered-cards losing buttons, etc). See [MAISON_LEFLEUR_V23_QA_FIXES.md](./MAISON_LEFLEUR_V23_QA_FIXES.md) for the full breakdown and proposed implementation batches. Nothing implemented yet — each batch needs its own spec here before work starts.
+
 ## Shipped Features
 
 - **Encrypted API Credentials for Script blocks + Shopify multi-auth-type support** — New generic `apiCredentials` credential type (`packages/credentials/src/schemas.ts`: `{ fields: {key, value}[] }`) lets Script blocks reference encrypted secrets instead of hardcoding them in `content`. Script block gains `credentialsId` (`packages/blocks/logic/src/script/schema.ts`), picker shown only for server-side execution; `executeScript.ts` decrypts server-side (same path as `executeForgedBlock.ts`) and `executeFunction.ts` injects it as a `globalThis.credentials` object in the isolate — scripts use `credentials.KEY` instead of a literal, so secrets never appear in exported bot JSON. New builder dialogs: `ApiCredentialsCreateDialog.tsx` / `ApiCredentialsUpdateDialogBody.tsx` / `ApiCredentialsFieldsForm.tsx`, wired into the generic `CredentialsCreateDialog.tsx`/`CredentialsUpdateDialog.tsx`/`CredentialsSettingsForm.tsx`. Shopify auth (`packages/forge/blocks/shopify/src/auth.ts`) gains an `apiType: "storefront" | "admin"` switch — Admin mode adds `adminAccessToken`, and `shopifyGraphqlRequest` (renamed from `storefrontRequest`) branches endpoint/header accordingly; existing credentials default to `storefront` (no migration). Bug found during manual testing: the credentials create/update dialogs never passed the live form state into `ZodObjectLayout`'s `blockOptions` prop, so any `auth` schema using `isHidden` (only Shopify's does) crashed on `undefined` destructuring — fixed by passing `blockOptions={data}` in `ForgedCredentialsCreateDialog.tsx`/`ForgedCredentialsUpdateDialogContent.tsx`. Unit tests: `executeFunction.test.ts` (new `packages/variables/vitest.config.ts`, since `isolated-vm` can't load under `bun test` on this machine — Windows/Bun limitation, not a code issue), `storefront.test.ts`.
@@ -202,22 +204,22 @@ docker push "ghcr.io/rakibj/peakflow-viewer:latest"
 
 **5. Copy compose file to VPS**
 ```powershell
-scp "D:\Projects\Web\peakflow\docker-compose.prod.yml" "peakflow-vps:/home/apps/peakflow/docker-compose.yml"
+scp "D:\Projects\Web\peakflow\docker-compose.prod.yml" "gameloops-vps:/home/apps/peakflow/docker-compose.yml"
 ```
 
 **6. Pull new images on VPS** (do NOT use `docker compose pull` — it can fail silently; use explicit `docker pull` instead)
 ```powershell
-ssh peakflow-vps "docker pull ghcr.io/rakibj/peakflow-builder:latest && docker pull ghcr.io/rakibj/peakflow-viewer:latest"
+ssh gameloops-vps "docker pull ghcr.io/rakibj/peakflow-builder:latest && docker pull ghcr.io/rakibj/peakflow-viewer:latest"
 ```
 
 **7. Restart containers**
 ```powershell
-ssh peakflow-vps "cd /home/apps/peakflow && docker compose up -d --no-build --force-recreate builder viewer"
+ssh gameloops-vps "cd /home/apps/peakflow && docker compose up -d --no-build --force-recreate builder viewer"
 ```
 
 **8. Verify** — image `Created` date must match today's date
 ```powershell
-ssh peakflow-vps "docker inspect ghcr.io/rakibj/peakflow-builder:latest | grep Created"
+ssh gameloops-vps "docker inspect ghcr.io/rakibj/peakflow-builder:latest | grep Created"
 ```
 
 ## Source Reference

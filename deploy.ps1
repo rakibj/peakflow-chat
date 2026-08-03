@@ -1,5 +1,5 @@
 $ErrorActionPreference = "Stop"
-$VPS = "peakflow-vps"
+$VPS = "gameloops-vps"
 $ROOT = $PSScriptRoot
 $OWNER = "rakibj"
 $REGISTRY = "ghcr.io/$OWNER"
