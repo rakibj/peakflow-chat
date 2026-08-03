@@ -167,7 +167,7 @@ export const CardsCaroussel = (props: Props) => {
                       <For each={item().paths}>
                         {(path, idx) => {
                           const sharedClass = cn(
-                            "w-full font-normal border-host-bubble-border rounded-none flex items-center justify-center",
+                            "w-full font-normal border-host-bubble-border rounded-none flex items-center justify-center text-center",
                             fontSizes().button,
                             idx() === 0 &&
                               "rounded-t-host-bubble border border-b-0",

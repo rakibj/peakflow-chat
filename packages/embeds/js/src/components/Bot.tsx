@@ -80,6 +80,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
   const [customCss, setCustomCss] = createSignal("");
   const [isInitialized, setIsInitialized] = createSignal(false);
   const [error, setError] = createSignal<Error | undefined>();
+  let hasDispatchedInitialStart = false;
 
   const initializeBot = async () => {
     if (props.font) injectFont(props.font);
@@ -209,7 +210,13 @@ export const Bot = (props: BotProps & { class?: string }) => {
   };
 
   createEffect(() => {
-    if (isNotDefined(props.typebot) || isInitialized()) return;
+    if (
+      isNotDefined(props.typebot) ||
+      isInitialized() ||
+      hasDispatchedInitialStart
+    )
+      return;
+    hasDispatchedInitialStart = true;
     initializeBot().then();
   });
 

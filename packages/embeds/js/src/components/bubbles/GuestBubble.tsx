@@ -170,14 +170,18 @@ const CardSnapshotsRow = (props: { snapshots: CardSnapshot[] }) => {
             >
               <Show when={snapshot.title}>
                 {(title) => (
-                  <h2 class="px-3 pt-1 font-semibold text-xs">{title()}</h2>
+                  <h2 class="px-3 pt-1 font-semibold text-xs line-clamp-2">
+                    {title()}
+                  </h2>
                 )}
               </Show>
               <Show when={snapshot.description}>
-                {(description) => <p class="px-3 text-xs">{description()}</p>}
+                {(description) => (
+                  <p class="px-3 text-xs line-clamp-3">{description()}</p>
+                )}
               </Show>
               <For each={snapshot.extraDescriptions}>
-                {(desc) => <p class="px-3 text-xs">{desc}</p>}
+                {(desc) => <p class="px-3 text-xs line-clamp-3">{desc}</p>}
               </For>
             </div>
           </div>
@@ -210,14 +214,18 @@ const CardSnapshotGuestBubble = (props: { snapshot: CardSnapshot }) => {
       >
         <Show when={props.snapshot.title}>
           {(title) => (
-            <h2 class="px-4 pt-2 font-semibold text-sm">{title()}</h2>
+            <h2 class="px-4 pt-2 font-semibold text-sm line-clamp-2">
+              {title()}
+            </h2>
           )}
         </Show>
         <Show when={props.snapshot.description}>
-          {(description) => <p class="px-4 text-sm">{description()}</p>}
+          {(description) => (
+            <p class="px-4 text-sm line-clamp-3">{description()}</p>
+          )}
         </Show>
         <For each={props.snapshot.extraDescriptions}>
-          {(desc) => <p class="px-4 text-sm">{desc}</p>}
+          {(desc) => <p class="px-4 text-sm line-clamp-3">{desc}</p>}
         </For>
       </div>
       <Show when={remainingPaths().length > 0}>
@@ -243,7 +251,7 @@ const SnapshotPathButton = (props: {
   isLast: boolean;
 }) => {
   const sharedClass = cx(
-    "w-full font-normal border-host-bubble-border flex items-center justify-center text-sm px-3 py-1.5",
+    "w-full font-normal border-host-bubble-border flex items-center justify-center text-center text-sm px-3 py-1.5",
     props.isFirst && "rounded-t-host-bubble border border-b-0",
     !props.isFirst && "border border-b-0",
     props.isLast && "rounded-b-host-bubble border-b",

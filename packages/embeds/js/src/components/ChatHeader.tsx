@@ -4,6 +4,7 @@ import type {
 } from "@typebot.io/theme/schemas";
 import { createSignal, For, onCleanup, Show } from "solid-js";
 import type { JSX } from "solid-js/jsx-runtime";
+import { formatPhoneForDisplay } from "../utils/formatPhoneForDisplay";
 import { PhoneIcon } from "./icons/PhoneIcon";
 import { WhatsAppIcon } from "./icons/WhatsAppIcon";
 
@@ -54,6 +55,14 @@ export const ChatHeader = (props: Props) => {
     document.removeEventListener("click", closeCallMenuIfOutside, true),
   );
 
+  const closeCallMenuOnEscape = (event: KeyboardEvent) => {
+    if (event.key === "Escape") setIsContactMenuOpen(false);
+  };
+  document.addEventListener("keydown", closeCallMenuOnEscape);
+  onCleanup(() =>
+    document.removeEventListener("keydown", closeCallMenuOnEscape),
+  );
+
   return (
     <div
       part="chat-header"
@@ -76,8 +85,9 @@ export const ChatHeader = (props: Props) => {
       <div class="flex flex-col min-w-0 flex-1">
         <Show when={props.header.name}>
           <span
-            class="font-semibold leading-tight"
+            class="font-semibold leading-tight truncate"
             style={{ "font-size": "15px" }}
+            title={props.header.name}
           >
             {props.header.name}
           </span>
@@ -107,12 +117,20 @@ export const ChatHeader = (props: Props) => {
               <Show
                 when={isContactAvailable()}
                 fallback={
-                  <span class="opacity-60 truncate">
+                  <span
+                    class="opacity-60 truncate"
+                    title={formatUnavailableMessage(props.contact)}
+                  >
                     {formatUnavailableMessage(props.contact)}
                   </span>
                 }
               >
-                <span class="opacity-60 truncate flex-1 min-w-0">
+                <span
+                  class="opacity-60 truncate flex-1 min-w-0"
+                  title={
+                    props.contact?.availableMessage ?? defaultAvailableMessage
+                  }
+                >
                   {props.contact?.availableMessage ?? defaultAvailableMessage}
                 </span>
                 <div class="flex items-center gap-0.5 shrink-0">
@@ -188,7 +206,7 @@ export const ChatHeader = (props: Props) => {
                       <PhoneIcon class="w-3.5 h-3.5 shrink-0 opacity-50" />
                       <span class="truncate">{location.label}</span>
                       <span class="ms-auto shrink-0 opacity-50" dir="ltr">
-                        {location.phone}
+                        {formatPhoneForDisplay(location.phone)}
                       </span>
                     </a>
                   )}
