@@ -20,8 +20,13 @@ type Props = {
 
 export const Edge = ({ edge, fromElementId }: Props) => {
   const { deleteEdge } = useTypebot();
-  const { previewingEdge, graphPosition, isReadOnly, setPreviewingEdge } =
-    useGraph();
+  const {
+    previewingEdge,
+    graphPosition,
+    isReadOnly,
+    setPreviewingEdge,
+    executedEdgeIds,
+  } = useGraph();
   const { sourceEndpointYOffsets, targetEndpointYOffsets } = useEndpoints();
   const fromElementCoordinates = useSelectionStore(
     useShallow((state) =>
@@ -42,6 +47,11 @@ export const Edge = ({ edge, fromElementId }: Props) => {
   const [isMouseOver, setIsMouseOver] = useState(false);
 
   const isPreviewing = isMouseOver || previewingEdge?.id === edge.id;
+  // "Executing" = the edge just crossed by the flow during a test run;
+  // "executed" = an earlier crossing in that same run.
+  const isExecuting = executedEdgeIds.at(-1) === edge.id;
+  const isExecuted =
+    !isPreviewing && !isExecuting && executedEdgeIds.includes(edge.id);
 
   const sourceTop = useMemo(() => {
     const endpointId =
@@ -126,12 +136,26 @@ export const Edge = ({ edge, fromElementId }: Props) => {
               data-testid="edge"
               d={path}
               className={cx(
-                isPreviewing || isContextMenuOpen
-                  ? "stroke-orange-8"
-                  : "stroke-gray-8",
+                isExecuting
+                  ? "stroke-orange-9"
+                  : isPreviewing || isContextMenuOpen
+                    ? "stroke-orange-8"
+                    : isExecuted
+                      ? "stroke-green-8"
+                      : "stroke-gray-8",
+                isExecuting && "typebot-edge-flow",
               )}
-              strokeWidth="2px"
-              markerEnd={isPreviewing ? "url(#orange-arrow)" : "url(#arrow)"}
+              strokeWidth={isExecuting ? "4px" : "2px"}
+              strokeDasharray={isExecuting ? "8 5" : undefined}
+              markerEnd={
+                isExecuting
+                  ? "url(#active-arrow)"
+                  : isPreviewing
+                    ? "url(#orange-arrow)"
+                    : isExecuted
+                      ? "url(#green-arrow)"
+                      : "url(#arrow)"
+              }
               fill="none"
               pointerEvents="none"
             />

@@ -25,7 +25,7 @@ const getDefaultRuntime = (typebotId?: string) => {
 export const PreviewDrawer = () => {
   const { typebot, save, isSavingLoading } = useTypebot();
   const { t } = useTranslate();
-  const { setPreviewingBlock } = useGraph();
+  const { resetExecutionTrail } = useGraph();
   const [width, setWidth] = useState(500);
   const [selectedRuntime, setSelectedRuntime] = useState<
     (typeof runtimes)[number]
@@ -38,7 +38,7 @@ export const PreviewDrawer = () => {
   };
 
   const handleCloseClick = () => {
-    setPreviewingBlock(undefined);
+    resetExecutionTrail();
     setRightPanel(null);
   };
 

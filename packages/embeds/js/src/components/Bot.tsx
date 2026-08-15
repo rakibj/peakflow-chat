@@ -61,6 +61,7 @@ export type BotProps = {
   startFrom?: StartFrom;
   sessionId?: string;
   onNewInputBlock?: (inputBlock: InputBlock) => void;
+  onNewBubbleBlockDisplayed?: (blockId: string) => void;
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onInit?: () => void;
   onEnd?: () => void;
@@ -284,6 +285,7 @@ export const Bot = (props: BotProps & { class?: string }) => {
             }}
             progressBarRef={props.progressBarRef}
             onNewInputBlock={props.onNewInputBlock}
+            onNewBubbleBlockDisplayed={props.onNewBubbleBlockDisplayed}
             onNewLogs={props.onNewLogs}
             onAnswer={props.onAnswer}
             onEnd={props.onEnd}
@@ -301,6 +303,7 @@ type BotContentProps = {
   class?: string;
   progressBarRef?: HTMLDivElement;
   onNewInputBlock?: (inputBlock: InputBlock) => void;
+  onNewBubbleBlockDisplayed?: (blockId: string) => void;
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onEnd?: () => void;
   onNewLogs?: (logs: LogInSession[]) => void;
@@ -398,6 +401,7 @@ const BotContent = (props: BotContentProps) => {
           context={props.context}
           initialChatReply={props.initialChatReply}
           onNewInputBlock={props.onNewInputBlock}
+          onNewBubbleBlockDisplayed={props.onNewBubbleBlockDisplayed}
           onAnswer={props.onAnswer}
           onEnd={props.onEnd}
           onNewLogs={props.onNewLogs}

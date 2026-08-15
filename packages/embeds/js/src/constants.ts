@@ -5,6 +5,7 @@ import type { PopupProps } from "./features/popup/components/Popup";
 export const defaultBotProps: BotProps = {
   typebot: undefined,
   onNewInputBlock: undefined,
+  onNewBubbleBlockDisplayed: undefined,
   onAnswer: undefined,
   onEnd: undefined,
   onInit: undefined,

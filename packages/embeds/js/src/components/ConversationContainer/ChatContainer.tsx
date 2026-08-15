@@ -57,6 +57,7 @@ type Props = {
   initialChatReply: StartChatResponse;
   context: BotContext;
   onNewInputBlock?: (inputBlock: InputBlock) => void;
+  onNewBubbleBlockDisplayed?: (blockId: string) => void;
   onAnswer?: (answer: { message: string; blockId: string }) => void;
   onEnd?: () => void;
   onNewLogs?: (logs: LogInSession[]) => void;
@@ -324,6 +325,7 @@ export const ChatContainer = (props: Props) => {
   };
 
   const handleNewBubbleDisplayed = async (blockId: string) => {
+    props.onNewBubbleBlockDisplayed?.(blockId);
     await popClientSideActions(blockId);
   };
 

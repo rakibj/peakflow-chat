@@ -26,6 +26,11 @@ const graphContext = createContext<{
   setPreviewingBlock: Dispatch<SetStateAction<PreviewingBlock | undefined>>;
   previewingEdge?: Edge;
   setPreviewingEdge: Dispatch<SetStateAction<Edge | undefined>>;
+  executedBlockIds: string[];
+  setExecutedBlockIds: Dispatch<SetStateAction<string[]>>;
+  executedEdgeIds: string[];
+  setExecutedEdgeIds: Dispatch<SetStateAction<string[]>>;
+  resetExecutionTrail: () => void;
   openedNodeId?: string;
   setOpenedNodeId: Dispatch<SetStateAction<string | undefined>>;
   isReadOnly: boolean;
@@ -55,6 +60,14 @@ export const GraphProvider = ({
   );
   const [previewingEdge, setPreviewingEdge] = useState<Edge>();
   const [previewingBlock, setPreviewingBlock] = useState<PreviewingBlock>();
+  const [executedBlockIds, setExecutedBlockIds] = useState<string[]>([]);
+  const [executedEdgeIds, setExecutedEdgeIds] = useState<string[]>([]);
+  const resetExecutionTrail = () => {
+    setExecutedBlockIds([]);
+    setExecutedEdgeIds([]);
+    setPreviewingBlock(undefined);
+    setPreviewingEdge(undefined);
+  };
   const [openedNodeId, setOpenedNodeId] = useState<string>();
   const [focusedGroupId, setFocusedGroupId] = useState<string>();
 
@@ -67,6 +80,11 @@ export const GraphProvider = ({
         setConnectingIds,
         previewingEdge,
         setPreviewingEdge,
+        executedBlockIds,
+        setExecutedBlockIds,
+        executedEdgeIds,
+        setExecutedEdgeIds,
+        resetExecutionTrail,
         openedNodeId: openedNodeId,
         setOpenedNodeId,
         isReadOnly,

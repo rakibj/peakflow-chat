@@ -68,6 +68,7 @@ export const BlockNode = ({
     isReadOnly,
     isAnalytics,
     previewingBlock,
+    executedBlockIds,
   } = useGraph();
   const { mouseOverBlock, setMouseOverBlock } = useBlockDnd();
   const { typebot, updateBlock } = useTypebot();
@@ -81,6 +82,11 @@ export const BlockNode = ({
     isConnecting ||
     previewingEdge?.to.blockId === block.id ||
     previewingBlock?.id === block.id;
+  // "Executing" = the block whose bubble is currently animating onto the
+  // screen during a test run; "executed" = an earlier step in that same run.
+  const isExecuting = executedBlockIds.at(-1) === block.id;
+  const isExecuted =
+    !isPreviewing && !isExecuting && executedBlockIds.includes(block.id);
 
   const groupId = typebot?.groups.at(indices.groupIndex)?.id;
 
@@ -241,10 +247,19 @@ export const BlockNode = ({
               >
                 <div
                   className={cx(
-                    "flex gap-2 flex-1 p-3 rounded-lg items-start w-full text-left select-none transition-[border-color,opacity] cursor-pointer bg-gray-2 dark:border-gray-3 relative",
-                    isContextMenuOpened || isPreviewing
-                      ? "border-2 border-orange-8 dark:border-orange-8 -m-px"
-                      : "border",
+                    "flex gap-2 flex-1 p-3 rounded-lg items-start w-full text-left select-none transition-[border-color,background-color,opacity] cursor-pointer dark:border-gray-3 relative",
+                    isExecuting
+                      ? "border-[3px] border-orange-9 dark:border-orange-9 -m-[2px] typebot-active-node"
+                      : isContextMenuOpened || isPreviewing
+                        ? "border-2 border-orange-8 dark:border-orange-8 -m-px"
+                        : isExecuted
+                          ? "border-2 border-green-8 dark:border-green-8 -m-px"
+                          : "border",
+                    isExecuting
+                      ? "bg-orange-4 dark:bg-orange-4"
+                      : isExecuted
+                        ? "bg-green-3 dark:bg-green-3"
+                        : "bg-gray-2",
                     block.disabled && "opacity-50",
                   )}
                 >

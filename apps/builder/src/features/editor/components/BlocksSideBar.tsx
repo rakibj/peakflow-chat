@@ -11,6 +11,8 @@ import { forgedBlocks } from "@typebot.io/forge-repository/definitions";
 import { isDefined } from "@typebot.io/lib/utils";
 import { Input } from "@typebot.io/ui/components/Input";
 import { Tooltip } from "@typebot.io/ui/components/Tooltip";
+import { ArrowLeft01Icon } from "@typebot.io/ui/icons/ArrowLeft01Icon";
+import { ArrowRight01Icon } from "@typebot.io/ui/icons/ArrowRight01Icon";
 import { SquareLock01Icon } from "@typebot.io/ui/icons/SquareLock01Icon";
 import { SquareUnlock01Icon } from "@typebot.io/ui/icons/SquareUnlock01Icon";
 import { cx } from "@typebot.io/ui/lib/cva";
@@ -23,7 +25,10 @@ import { useEventListener } from "@/hooks/useEventListener";
 import { EventCard } from "../../events/components/EventCard";
 import { EventCardOverlay } from "../../events/components/EventCardOverlay";
 import { getEventBlockLabel } from "../../events/components/EventLabel";
-import { leftSidebarLockedStorageKey } from "../constants";
+import {
+  leftSidebarCollapsedStorageKey,
+  leftSidebarLockedStorageKey,
+} from "../constants";
 import { BlockCard } from "./BlockCard";
 import { BlockCardOverlay } from "./BlockCardOverlay";
 import {
@@ -55,8 +60,12 @@ export const BlocksSideBar = () => {
   const [isLocked, setIsLocked] = useState(
     localStorage.getItem(leftSidebarLockedStorageKey) !== "false",
   );
+  const [isCollapsed, setIsCollapsed] = useState(
+    localStorage.getItem(leftSidebarCollapsedStorageKey) === "true",
+  );
   const [isExtended, setIsExtended] = useState(
-    localStorage.getItem(leftSidebarLockedStorageKey) !== "false",
+    localStorage.getItem(leftSidebarCollapsedStorageKey) !== "true" &&
+      localStorage.getItem(leftSidebarLockedStorageKey) !== "false",
   );
   const [searchInput, setSearchInput] = useState("");
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -72,6 +81,7 @@ export const BlocksSideBar = () => {
         y: clientY - relativeCoordinates.y,
       });
     }
+    if (isCollapsed) return;
     if (isLocked) return;
     if (isMouseInElement(sidebarRef.current, clientX, clientY)) {
       closeSideBar.flush();
@@ -128,6 +138,26 @@ export const BlocksSideBar = () => {
       console.error(error);
     }
     setIsLocked(!isLocked);
+  };
+
+  const handleCollapseClick = () => {
+    try {
+      localStorage.setItem(leftSidebarCollapsedStorageKey, "true");
+    } catch (error) {
+      console.error(error);
+    }
+    setIsCollapsed(true);
+    setIsExtended(false);
+  };
+
+  const handleExpandClick = () => {
+    try {
+      localStorage.setItem(leftSidebarCollapsedStorageKey, "false");
+    } catch (error) {
+      console.error(error);
+    }
+    setIsCollapsed(false);
+    setIsExtended(true);
   };
 
   const handleSearchInputChange = (event: {
@@ -190,157 +220,193 @@ export const BlocksSideBar = () => {
   );
 
   return (
-    <div
-      ref={sidebarRef}
-      className={cx(
-        "flex w-[360px] absolute pl-4 py-4 left-0 transition-transform duration-150 ease-out h-[calc(100vh-var(--header-height))]",
-        isExtended ? "translate-x-0" : "translate-x-[-350px]",
-      )}
-    >
-      <div className="flex flex-col w-full rounded-lg border pt-4 pb-10 px-4 gap-6 overflow-y-auto bg-gray-1 select-none">
-        <div className="flex justify-between w-full items-center gap-3">
-          <Input
-            placeholder="Search"
-            value={searchInput}
-            onChange={handleSearchInputChange}
-          />
-          <Tooltip.Root>
-            <Tooltip.TriggerButton
-              aria-label={
-                isLocked
-                  ? t("editor.sidebarBlocks.sidebar.icon.unlock.label")
-                  : t("editor.sidebarBlocks.sidebar.icon.lock.label")
-              }
-              size="icon"
-              variant="secondary"
-              className="size-8"
-              onClick={handleLockClick}
-            >
-              {isLocked ? <SquareLock01Icon /> : <SquareUnlock01Icon />}
-            </Tooltip.TriggerButton>
-            <Tooltip.Popup>
-              {isLocked
-                ? t("editor.sidebarBlocks.sidebar.unlock.label")
-                : t("editor.sidebarBlocks.sidebar.lock.label")}
-            </Tooltip.Popup>
-          </Tooltip.Root>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <h4 className="text-sm">
-            {t("editor.sidebarBlocks.blockType.bubbles.heading")}
-          </h4>
-          <div className="grid gap-3 grid-cols-2">
-            {filteredBubbleBlockTypes.map((type) => (
-              <BlockCard
-                key={type}
-                type={type}
-                onMouseDown={initBlockDragging}
-              />
-            ))}
+    <>
+      <div
+        ref={sidebarRef}
+        className={cx(
+          "flex w-[360px] absolute pl-4 py-4 left-0 transition-transform duration-150 ease-out h-[calc(100vh-var(--header-height))]",
+          isExtended ? "translate-x-0" : "translate-x-[-350px]",
+        )}
+      >
+        <div className="flex flex-col w-full rounded-lg border pt-4 pb-10 px-4 gap-6 overflow-y-auto bg-gray-1 select-none">
+          <div className="flex justify-between w-full items-center gap-3">
+            <Input
+              placeholder="Search"
+              value={searchInput}
+              onChange={handleSearchInputChange}
+            />
+            <div className="flex items-center gap-1 shrink-0">
+              <Tooltip.Root>
+                <Tooltip.TriggerButton
+                  aria-label={
+                    isLocked
+                      ? t("editor.sidebarBlocks.sidebar.icon.unlock.label")
+                      : t("editor.sidebarBlocks.sidebar.icon.lock.label")
+                  }
+                  size="icon"
+                  variant="secondary"
+                  className="size-8"
+                  onClick={handleLockClick}
+                >
+                  {isLocked ? <SquareLock01Icon /> : <SquareUnlock01Icon />}
+                </Tooltip.TriggerButton>
+                <Tooltip.Popup>
+                  {isLocked
+                    ? t("editor.sidebarBlocks.sidebar.unlock.label")
+                    : t("editor.sidebarBlocks.sidebar.lock.label")}
+                </Tooltip.Popup>
+              </Tooltip.Root>
+              <Tooltip.Root>
+                <Tooltip.TriggerButton
+                  aria-label={t(
+                    "editor.sidebarBlocks.sidebar.icon.collapse.label",
+                  )}
+                  size="icon"
+                  variant="secondary"
+                  className="size-8"
+                  onClick={handleCollapseClick}
+                >
+                  <ArrowLeft01Icon />
+                </Tooltip.TriggerButton>
+                <Tooltip.Popup>
+                  {t("editor.sidebarBlocks.sidebar.collapse.label")}
+                </Tooltip.Popup>
+              </Tooltip.Root>
+            </div>
           </div>
-        </div>
 
-        <div className="flex flex-col gap-2">
-          <h4 className="text-sm">
-            {t("editor.sidebarBlocks.blockType.inputs.heading")}
-          </h4>
-          <div className="grid gap-3 grid-cols-2">
-            {filteredInputBlockTypes.map((type) => (
-              <BlockCard
-                key={type}
-                type={type}
-                onMouseDown={initBlockDragging}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <h4 className="text-sm">
-            {t("editor.sidebarBlocks.blockType.logic.heading")}
-          </h4>
-          <div className="grid gap-3 grid-cols-2">
-            {filteredLogicBlockTypes.map((type) => (
-              <BlockCard
-                key={type}
-                type={type}
-                onMouseDown={initBlockDragging}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <h4 className="text-sm">
-            {t("editor.sidebarBlocks.blockType.events.heading")}
-          </h4>
-          <div className="grid gap-3 grid-cols-2">
-            {filteredEventBlockTypes.map((type) => (
-              <EventCard
-                key={type}
-                type={type}
-                onMouseDown={initEventDragging}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <h4 className="text-sm">
-            {t("editor.sidebarBlocks.blockType.integrations.heading")}
-          </h4>
-          <div className="grid gap-3 grid-cols-2">
-            {filteredIntegrationBlockTypes
-              .concat(filteredForgedBlockIds as any)
-              .map((type) => (
+          <div className="flex flex-col gap-2">
+            <h4 className="text-sm">
+              {t("editor.sidebarBlocks.blockType.bubbles.heading")}
+            </h4>
+            <div className="grid gap-3 grid-cols-2">
+              {filteredBubbleBlockTypes.map((type) => (
                 <BlockCard
                   key={type}
                   type={type}
                   onMouseDown={initBlockDragging}
                 />
               ))}
+            </div>
           </div>
-        </div>
 
-        {draggedBlockType && (
-          <Portal>
-            <BlockCardOverlay
-              type={draggedBlockType}
-              className="fixed top-0 left-0"
-              style={{
-                transform: `translate(${position.x}px, ${position.y}px) rotate(-2deg)`,
-              }}
-            />
-          </Portal>
-        )}
-        {draggedEventType && (
-          <Portal>
-            <EventCardOverlay
-              type={draggedEventType}
-              className="fixed top-0 left-0"
-              style={{
-                transform: `translate(${position.x}px, ${position.y}px) rotate(-2deg)`,
-              }}
-            />
-          </Portal>
+          <div className="flex flex-col gap-2">
+            <h4 className="text-sm">
+              {t("editor.sidebarBlocks.blockType.inputs.heading")}
+            </h4>
+            <div className="grid gap-3 grid-cols-2">
+              {filteredInputBlockTypes.map((type) => (
+                <BlockCard
+                  key={type}
+                  type={type}
+                  onMouseDown={initBlockDragging}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <h4 className="text-sm">
+              {t("editor.sidebarBlocks.blockType.logic.heading")}
+            </h4>
+            <div className="grid gap-3 grid-cols-2">
+              {filteredLogicBlockTypes.map((type) => (
+                <BlockCard
+                  key={type}
+                  type={type}
+                  onMouseDown={initBlockDragging}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <h4 className="text-sm">
+              {t("editor.sidebarBlocks.blockType.events.heading")}
+            </h4>
+            <div className="grid gap-3 grid-cols-2">
+              {filteredEventBlockTypes.map((type) => (
+                <EventCard
+                  key={type}
+                  type={type}
+                  onMouseDown={initEventDragging}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <h4 className="text-sm">
+              {t("editor.sidebarBlocks.blockType.integrations.heading")}
+            </h4>
+            <div className="grid gap-3 grid-cols-2">
+              {filteredIntegrationBlockTypes
+                .concat(filteredForgedBlockIds as any)
+                .map((type) => (
+                  <BlockCard
+                    key={type}
+                    type={type}
+                    onMouseDown={initBlockDragging}
+                  />
+                ))}
+            </div>
+          </div>
+
+          {draggedBlockType && (
+            <Portal>
+              <BlockCardOverlay
+                type={draggedBlockType}
+                className="fixed top-0 left-0"
+                style={{
+                  transform: `translate(${position.x}px, ${position.y}px) rotate(-2deg)`,
+                }}
+              />
+            </Portal>
+          )}
+          {draggedEventType && (
+            <Portal>
+              <EventCardOverlay
+                type={draggedEventType}
+                className="fixed top-0 left-0"
+                style={{
+                  transform: `translate(${position.x}px, ${position.y}px) rotate(-2deg)`,
+                }}
+              />
+            </Portal>
+          )}
+        </div>
+        {!isLocked && !isCollapsed && (
+          <button
+            ref={dockBarRef}
+            type="button"
+            aria-label="Open blocks sidebar"
+            className="flex animate-in fade-in-0 absolute h-full w-[450px] justify-end pr-10 items-center -right-[70px] top-0 -z-10"
+            onFocus={() => {
+              closeSideBar.flush();
+              setIsExtended(true);
+            }}
+          >
+            <span className="flex w-[5px] h-[20px] rounded-md bg-gray-7" />
+          </button>
         )}
       </div>
-      {!isLocked && (
-        <button
-          ref={dockBarRef}
-          type="button"
-          aria-label="Open blocks sidebar"
-          className="flex animate-in fade-in-0 absolute h-full w-[450px] justify-end pr-10 items-center -right-[70px] top-0 -z-10"
-          onFocus={() => {
-            closeSideBar.flush();
-            setIsExtended(true);
-          }}
-        >
-          <span className="flex w-[5px] h-[20px] rounded-md bg-gray-7" />
-        </button>
+      {isCollapsed && (
+        <Tooltip.Root>
+          <Tooltip.TriggerButton
+            aria-label={t("editor.sidebarBlocks.sidebar.icon.expand.label")}
+            size="icon"
+            variant="secondary"
+            className="absolute left-2 top-4 size-8 animate-in fade-in-0"
+            onClick={handleExpandClick}
+          >
+            <ArrowRight01Icon />
+          </Tooltip.TriggerButton>
+          <Tooltip.Popup>
+            {t("editor.sidebarBlocks.sidebar.expand.label")}
+          </Tooltip.Popup>
+        </Tooltip.Root>
       )}
-    </div>
+    </>
   );
 };
 

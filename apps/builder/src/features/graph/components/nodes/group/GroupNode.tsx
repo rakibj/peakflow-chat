@@ -28,6 +28,7 @@ export const GroupNode = ({ group, groupIndex }: Props) => {
     setConnectingIds,
     previewingEdge,
     previewingBlock,
+    executedBlockIds,
     isReadOnly,
     graphPosition,
   } = useGraph();
@@ -48,6 +49,13 @@ export const GroupNode = ({ group, groupIndex }: Props) => {
         previewingEdge.from.groupId === group.id) ||
         (previewingEdge.to.groupId === group.id &&
           isNotDefined(previewingEdge.to.blockId))));
+  const isExecuting =
+    executedBlockIds.length > 0 &&
+    group.blocks.some((block) => block.id === executedBlockIds.at(-1));
+  const isExecuted =
+    !isPreviewing &&
+    !isExecuting &&
+    group.blocks.some((block) => executedBlockIds.includes(block.id));
 
   const groupRef = useRef<HTMLDivElement | null>(null);
   const isDraggingGraph = useSelectionStore((state) => state.isDraggingGraph);
@@ -166,10 +174,19 @@ export const GroupNode = ({ group, groupIndex }: Props) => {
             } as React.CSSProperties
           }
           className={cx(
-            "flex flex-col group px-4 pt-4 pb-2 rounded-xl border absolute gap-0 select-none bg-gray-1 w-(--group-width) transition-[border-color,box-shadow] hover:shadow-md",
-            isConnecting || isContextMenuOpened || isPreviewing || isFocused
-              ? "border-orange-8"
-              : undefined,
+            "flex flex-col group px-4 pt-4 pb-2 rounded-xl border absolute gap-0 select-none w-(--group-width) transition-[border-color,background-color,box-shadow] hover:shadow-md",
+            isExecuting
+              ? "border-[3px] border-orange-9 typebot-active-node"
+              : isConnecting || isContextMenuOpened || isPreviewing || isFocused
+                ? "border-orange-8"
+                : isExecuted
+                  ? "border-green-8"
+                  : undefined,
+            isExecuting
+              ? "bg-orange-3 dark:bg-orange-3"
+              : isExecuted
+                ? "bg-green-2 dark:bg-green-2"
+                : "bg-gray-1",
             isMouseDown ? "cursor-grabbing" : "cursor-pointer",
             isFocused ? "z-10" : undefined,
             isDraggingGraph ? "pointer-events-none" : "pointer-events-auto",
